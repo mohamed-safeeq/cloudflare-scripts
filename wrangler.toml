@@ -1,23 +1,11 @@
-name = "medon-worker"
+name = "cloudflare-script"
 main = "src/index.js"
-account_id = "5e75bbfd6c5a2ea1c573744892e4da96"
+account_id = "c270c42dbc42a6d290963cc38f640aa8"
 workers_dev = true
-compatibility_date = "2025-10-09"
+compatibility_date = "2026-02-04"
 
-# Your existing KV namespaces (NOW FIXED)
-[[kv_namespaces]]
-binding = "MEDON_KV"   # <-- REQUIRED FIELD
-id = "d5cf0b3d9e59413ba78bce17b51ae33a"
-preview_id = "ec33206a7e3a49ee9fa1009fba4e7783"
 
 # Environment variables
 [vars]
 OPENAI_API_KEY = "${OPENAI_API_KEY}"
 
-
-[observability]
-[observability.logs]
-enabled = false
-head_sampling_rate = 1
-invocation_logs = true
-persist = true
