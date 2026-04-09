@@ -1,4 +1,4 @@
-name = "cloudflare-script"
+name = "cloudflare-scripts"
 main = "src/index.js"
 account_id = "c270c42dbc42a6d290963cc38f640aa8"
 workers_dev = true
