@@ -1,15 +1,27 @@
 import { getContactIdByPhone, updateReplyNeeded } from './hubspot.js';
 import { logRequest } from './utils.js';
-import medonHandler from './medon_pharmacy.js'; // 👈 Import your Medon handler
-import smartflowTranscriptHandler from "./Internal_Smartflow_Transcript_Zoho"; 
+import medonHandler from './medon_pharmacy.js';
+import smartflowTranscriptHandler from "./Internal_Smartflow_Transcript_Zoho";
+import sellDoHandler from "./sell_do.js";
+
+const CORS_HEADERS = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+};
 
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
 
+    // Handle CORS preflight
+    if (request.method === 'OPTIONS') {
+      return new Response(null, { status: 204, headers: CORS_HEADERS });
+    }
+
     // Allow only POST for all routes
     if (request.method !== 'POST') {
-      return new Response('Method Not Allowed', { status: 405 });
+      return new Response('Method Not Allowed', { status: 405, headers: CORS_HEADERS });
     }
 
     try {
@@ -66,8 +78,24 @@ export default {
         return await smartflowTranscriptHandler.fetch(request, env);
       }
 
+        // ============================================
+        // 🔹 4️⃣ SELL.DO — MESSAGE LOG
+        // Endpoint: POST /message/log
+        // ============================================
+        case '/message/log': {
+          return await sellDoHandler.fetch(request, env);
+        }
+
         // ===========================
-        // 🔹 3️⃣ DEFAULT — UNKNOWN PATH
+        // 🔹 5️⃣ SELL.DO LEAD CREATE
+        // Endpoint: POST /sell_do
+        // ===========================
+        case '/sell_do': {
+          return await sellDoHandler.fetch(request, env);
+        }
+
+        // ===========================
+        // 🔹 DEFAULT — UNKNOWN PATH
         // ===========================
         default:
           return new Response('Not Found', { status: 404 });

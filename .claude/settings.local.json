@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node -e \"require\\('./server.js'\\)\")",
+      "Bash(node:*)",
+      "Bash(cp \"C:/Cloudflare Project/Cloudflare-scripts-main/test/server.js\" \"C:/Cloudflare Project/conversation-log/server.js\")",
+      "Bash(cp \"C:/Cloudflare Project/Cloudflare-scripts-main/test/webhook_tester.html\" \"C:/Cloudflare Project/webhook-tester/index.html\")"
+    ]
+  }
+}
