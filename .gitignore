@@ -1,2 +1,22 @@
 node_modules/
 src/node_modules/
+
+# Wrangler
+.wrangler/
+src/.wrangler/
+
+# Environment variables
+.env
+.env.*
+.dev.vars
+
+# Logs
+*.log
+logs/
+
+# Claude
+.claude/
+
+# OS
+.DS_Store
+Thumbs.db
