@@ -12,7 +12,7 @@ export default {
       const body = await request.json();
       const wp   = body.whatsapp || {};
 
-      // Skip template messages — not real conversation content
+      // Skip template messages
       if (wp.type === 'template') {
         console.log('[sell_do] skipped: template message');
         return new Response(JSON.stringify({ skipped: true }), { status: 200 });
@@ -20,17 +20,35 @@ export default {
 
       // Determine direction
       const direction = body.sender === body.contactId ? 'message.received' : 'message.sent';
-      console.log('[sell_do] direction:', direction);
 
-      const name    = body.contact?.name || '';
-      const phone   = wp.from || wp.to   || '';
-     //const phone   = 919176045004;  // Hardcoded for testing
-      const message = wp.text?.body      || '';
+      // ── Name ──────────────────────────────────────────────
+      const name =
+        body.contact?.name ||
+        wp.pushname        ||
+        wp.notifyName      ||
+        '';
 
-      console.log('[sell_do] name   :', name);
-      console.log('[sell_do] phone  :', phone);
-      console.log('[sell_do] message:', message);
+      // ── Phone ─────────────────────────────────────────────
+      // const phone = wp.from || wp.to || '';
+      const phone = 919176045004; // Hardcoded for testing
 
+      // ── Message ───────────────────────────────────────────
+      // message.sent (rule-based bot): wp.type=interactive → wp.interactive.body.text
+      // message.sent (AI bot):         wp.type=text        → wp.text.body
+      // message.sent (human agent):    wp.type=text        → wp.text.body
+      // message.received:              wp.type=text        → wp.text.body
+      const message =
+        wp.interactive?.body?.text ||   // rule-based bot (interactive list/button)
+        wp.text?.body              ||   // AI bot / human agent / received text
+        body.body                  ||   // fallback outgoing text
+        wp.body                    ||
+        wp.message                 ||
+        wp.caption                 ||
+        '';
+
+      console.log(`\n[sell_do] ${direction}\n  name   : ${name || '(empty)'}\n  phone  : ${phone}\n  msg    : ${message || '(empty)'}\n`);
+
+      // ── Build & send Sell.do request ──────────────────────
       const params = new URLSearchParams();
       params.append('sell_do[form][lead][name]',    name);
       params.append('sell_do[form][lead][phone]',   phone);
@@ -42,8 +60,23 @@ export default {
         body:    params.toString(),
       });
 
-      const sellDoBody = await sellDoRes.text();
-      console.log('[sell_do] response:', sellDoRes.status, sellDoBody);
+      let sellDoBody = null;
+      try { sellDoBody = await sellDoRes.json(); } catch (_) { /* non-JSON response */ }
+
+      const leadId =
+        sellDoBody?.lead?.id      ||
+        sellDoBody?.data?.id      ||
+        sellDoBody?.lead_id       ||
+        sellDoBody?.id            ||
+        null;
+
+      const errors = sellDoBody?.errors ?? sellDoBody?.error ?? null;
+
+      if (!sellDoRes.ok) {
+        console.error(`\n[sell_do] API error: ${sellDoRes.status}\n  errors : ${JSON.stringify(errors)}\n  body   : ${JSON.stringify(sellDoBody, null, 2)}\n`);
+      } else {
+        console.log(`\n[sell_do] API ok: ${sellDoRes.status}\n  lead_id: ${leadId ?? '(unknown)'}\n  errors : ${JSON.stringify(errors)}\n  full   :\n${JSON.stringify(sellDoBody, null, 2)}\n`);
+      }
 
       return new Response(JSON.stringify({ ok: true, direction, selldo: sellDoRes.status }), {
         status:  200,

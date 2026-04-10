@@ -1,5 +1,5 @@
 import { getContactIdByPhone, updateReplyNeeded } from './hubspot.js';
-import { logRequest } from './utils.js';
+import { logRequest, logWhatsappFields } from './utils.js';
 import medonHandler from './medon_pharmacy.js';
 import smartflowTranscriptHandler from "./Internal_Smartflow_Transcript_Zoho";
 import sellDoHandler from "./sell_do.js";
